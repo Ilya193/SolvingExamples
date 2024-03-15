@@ -69,7 +69,7 @@ class GameViewModel(
     }
 
     fun answer(page: Int) = viewModelScope.launch(Dispatchers.IO) {
-        val list = solutions[page - 1].toMutableList()
+        val list = solutions[page - 1]
         val answer = list.first { it.selected }
         val index = list.indexOf(answer)
         if (page < solutions.size) {
