@@ -14,6 +14,7 @@ import ru.kraz.feature_game.data.GameRepositoryImpl
 import ru.kraz.feature_game.data.GameService
 import ru.kraz.feature_game.domain.GameRepository
 import ru.kraz.feature_game.presentation.BaseStringErrorProvider
+import ru.kraz.feature_game.presentation.GameRouter
 import ru.kraz.feature_game.presentation.GameViewModel
 import ru.kraz.feature_menu.MenuRouter
 import ru.kraz.feature_menu.MenuViewModel
@@ -37,6 +38,10 @@ val appModule = module {
     }
 
     single<MenuRouter> {
+        navigation
+    }
+
+    single<GameRouter> {
         navigation
     }
 
@@ -65,6 +70,6 @@ val appModule = module {
     }
 
     viewModel<GameViewModel> {
-        GameViewModel(get(), get())
+        GameViewModel(get(), get(), get())
     }
 }

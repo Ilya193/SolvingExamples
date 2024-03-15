@@ -6,6 +6,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import ru.kraz.feature_game.presentation.GameFragment
+import ru.kraz.feature_game.presentation.GameRouter
 import ru.kraz.feature_menu.MenuFragment
 import ru.kraz.feature_menu.MenuRouter
 
@@ -13,7 +14,7 @@ interface Navigation<T> {
     fun read(): LiveData<T>
     fun update(value: T)
 
-    class Base : Navigation<Screen>, MenuRouter {
+    class Base : Navigation<Screen>, MenuRouter, GameRouter {
         private val screen = MutableLiveData<Screen>()
 
         override fun read(): LiveData<Screen> = screen
@@ -28,6 +29,10 @@ interface Navigation<T> {
 
         override fun coup() {
             update(Screen.Coup)
+        }
+
+        override fun comeback() {
+            update(Screen.Pop)
         }
 
     }

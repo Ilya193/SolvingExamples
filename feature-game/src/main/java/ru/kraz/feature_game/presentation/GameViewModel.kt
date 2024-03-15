@@ -13,6 +13,7 @@ import ru.kraz.feature_game.presentation.Utils.toExampleUi
 import ru.kraz.feature_game.presentation.Utils.toSolutionUi
 
 class GameViewModel(
+    private val router: GameRouter,
     private val repository: GameRepository,
     private val errorProvider: StringErrorProvider,
 ) : ViewModel() {
@@ -59,15 +60,6 @@ class GameViewModel(
             _uiState.value = GameUiState.Success(examples = examples.toList(), solutions = solutions[page])
 
     }
-}
 
-data class ExampleUi(val id: Int, val example: String, val correctAnswer: Int)
-data class SolutionUi(val id: Int, val solution: String, val selected: Boolean = false)
-
-sealed interface GameUiState {
-    data class Success(val examples: List<ExampleUi>, val solutions: List<SolutionUi>) :
-        GameUiState
-
-    data object Loading : GameUiState
-    data class Error(val msg: Int) : GameUiState
+    fun comeback() = router.comeback()
 }

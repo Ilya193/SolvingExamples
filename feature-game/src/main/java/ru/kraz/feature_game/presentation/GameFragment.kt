@@ -31,51 +31,54 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val examplesAdapter = ExamplesAdapter()
-        binding.examples.adapter = examplesAdapter
-        binding.examples.isUserInputEnabled = false
+        if (savedInstanceState != null) viewModel.comeback()
+        else {
+            val examplesAdapter = ExamplesAdapter()
+            binding.examples.adapter = examplesAdapter
+            binding.examples.isUserInputEnabled = false
 
-        val solutionsAdapter = SolutionAdapter(select = {
-            viewModel.select(page = binding.examples.currentItem, it)
-        })
-        binding.solutionOptions.adapter = solutionsAdapter
+            val solutionsAdapter = SolutionAdapter(select = {
+                viewModel.select(page = binding.examples.currentItem, it)
+            })
+            binding.solutionOptions.adapter = solutionsAdapter
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect {
-                    binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
-                    binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                    binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                    binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                    binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
+            viewLifecycleOwner.lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    viewModel.uiState.collect {
+                        binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
+                        binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                        binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                        binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                        binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
 
-                    if (it is GameUiState.Success) {
-                        examplesAdapter.submitList(it.examples)
-                        solutionsAdapter.submitList(it.solutions)
+                        if (it is GameUiState.Success) {
+                            examplesAdapter.submitList(it.examples)
+                            solutionsAdapter.submitList(it.solutions)
+                        }
                     }
                 }
             }
-        }
 
-        /*viewModel.uiState.observe(viewLifecycleOwner) {
-            binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
-            binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-            binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-            binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-            binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
+            /*viewModel.uiState.observe(viewLifecycleOwner) {
+                binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
+                binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
 
-            if (it is GameUiState.Success) {
-                examplesAdapter.submitList(it.examples)
-                solutionsAdapter.submitList(it.testSolutions)
+                if (it is GameUiState.Success) {
+                    examplesAdapter.submitList(it.examples)
+                    solutionsAdapter.submitList(it.testSolutions)
+                }
+            }*/
+
+            viewModel.init(id)
+
+            binding.btnAnswer.setOnClickListener {
+                val newItem = binding.examples.currentItem + 1
+                binding.examples.currentItem = newItem
+                viewModel.answer(newItem)
             }
-        }*/
-
-        viewModel.init(id)
-
-        binding.btnAnswer.setOnClickListener {
-            val newItem = binding.examples.currentItem + 1
-            binding.examples.currentItem = newItem
-            viewModel.answer(newItem)
         }
     }
 
