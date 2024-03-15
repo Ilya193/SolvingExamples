@@ -2,6 +2,7 @@ package ru.kraz.solvingexamples
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
