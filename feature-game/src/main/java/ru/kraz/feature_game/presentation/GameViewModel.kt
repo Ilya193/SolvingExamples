@@ -21,6 +21,8 @@ class GameViewModel(
     private val examples = mutableListOf<ExampleUi>()
     private var solutions = mutableListOf<MutableList<SolutionUi>>()
 
+    private val solvedExamples = mutableListOf<SolvedExample>()
+
     private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Loading)
     val uiState: StateFlow<GameUiState> get() = _uiState
 
@@ -33,7 +35,14 @@ class GameViewModel(
                         it.toSolutionUi(solution)
                     }.toMutableList()
                 })
-                _uiState.value = GameUiState.Success(examples = examples.toList(), solutions = solutions[0])
+                solvedExamples.addAll((0..<solutions.size).map {
+                    SolvedExample(it, "${it + 1}")
+                })
+                _uiState.value = GameUiState.Success(
+                    examples = examples.toList(),
+                    solutions = solutions[0],
+                    solvedExamples = solvedExamples
+                )
             }
 
             is ResultFDS.Error -> _uiState.value = GameUiState.Error(errorProvider.getData(res.e))
@@ -52,13 +61,28 @@ class GameViewModel(
             }
         }
         solutions[page] = list
-        _uiState.value = GameUiState.Success(examples = examples.toList(), solutions = list)
+        _uiState.value = GameUiState.Success(
+            examples = examples.toList(),
+            solutions = list,
+            solvedExamples.toList()
+        )
     }
 
     fun answer(page: Int) = viewModelScope.launch(Dispatchers.IO) {
-        if (page < solutions.size)
-            _uiState.value = GameUiState.Success(examples = examples.toList(), solutions = solutions[page])
-
+        val list = solutions[page - 1].toMutableList()
+        val answer = list.first { it.selected }
+        val index = list.indexOf(answer)
+        if (page < solutions.size) {
+            if (examples[page - 1].correctAnswer == index)
+                solvedExamples[page - 1] = solvedExamples[page - 1].copy(solved = true)
+            else solvedExamples[page - 1] = solvedExamples[page - 1].copy(solved = false)
+            _uiState.value =
+                GameUiState.Success(
+                    examples = examples.toList(),
+                    solutions = solutions[page],
+                    solvedExamples.toList()
+                )
+        }
     }
 
     fun comeback() = router.comeback()

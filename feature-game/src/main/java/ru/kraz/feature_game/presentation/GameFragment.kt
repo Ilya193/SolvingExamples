@@ -38,10 +38,12 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
             binding.examples.isUserInputEnabled = false
 
             val solutionsAdapter = SolutionAdapter(select = {
-
                 viewModel.select(page = binding.examples.currentItem, it)
             })
             binding.solutionOptions.adapter = solutionsAdapter
+
+            val solvedAdapter = SolvedExamplesAdapter()
+            binding.solvedList.adapter = solvedAdapter
 
             viewLifecycleOwner.lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -51,11 +53,13 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
                         binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
                         binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
                         binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
+                        binding.solvedList.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
 
                         if (it is GameUiState.Success) {
                             binding.btnAnswer.isEnabled = it.solutions.any { it.selected }
                             examplesAdapter.submitList(it.examples)
                             solutionsAdapter.submitList(it.solutions)
+                            solvedAdapter.submitList(it.solvedExamples)
                         }
                     }
                 }
