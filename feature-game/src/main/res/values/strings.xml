@@ -1,0 +1,9 @@
+<resources>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="retry">Попробовать снова</string>
+    <string name="info_error">Произошла ошибка</string>
+    <string name="answer">Ответить</string>
+    <string name="no_connection">Нет подключения к интернету</string>
+    <string name="generic_error">Произошла ошибка</string>
+</resources>

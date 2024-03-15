@@ -21,8 +21,6 @@ class MenuViewModel(
 
     val uiState: StateFlow<List<LevelUi>> get() = _uiState
 
-    fun coup() = router.coup()
-
     fun expand(index: Int) = viewModelScope.launch(Dispatchers.IO) {
         val value = levels[index].expanded
         if (value) levels[index] = levels[index].copy(expanded = false)
@@ -37,7 +35,9 @@ class MenuViewModel(
         _uiState.value = levels.toList()
     }
 
-    fun start(index: Int, mode: Boolean) {
-        router.openGame()
+    fun start(id: Int, mode: Boolean) {
+        router.openGame(id, mode)
     }
+
+    fun coup() = router.coup()
 }

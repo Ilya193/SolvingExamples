@@ -23,16 +23,16 @@ class LevelsAdapter(
 
             view.tvStart.setOnClickListener {
                 if (adapterPosition != RecyclerView.NO_POSITION)
-                    start(adapterPosition, view.checkClock.isChecked)
+                    start(getItem(adapterPosition).id, view.checkClock.isChecked)
             }
         }
 
         fun bind(item: LevelUi) {
             view.tvLevel.text = item.name
-            bindInfo(item)
+            bindSettingStart(item)
         }
 
-        fun bindInfo(item: LevelUi) {
+        fun bindSettingStart(item: LevelUi) {
             if (item.expanded) {
                 view.boxInfo.visibility = View.VISIBLE
                 view.boxInfo.animate().translationY(0f).alpha(1f).setDuration(350).start()
@@ -54,7 +54,7 @@ class LevelsAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
         if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads)
-        else holder.bindInfo(getItem(position))
+        else holder.bindSettingStart(getItem(position))
     }
 }
 

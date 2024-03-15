@@ -4,5 +4,5 @@ import ru.kraz.common.Router
 
 
 interface MenuRouter : Router {
-    fun openGame()
+    fun openGame(id: Int, mode: Boolean)
 }

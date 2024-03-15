@@ -17,3 +17,4 @@ rootProject.name = "SolvingExamples"
 include(":app")
 include(":feature-menu")
 include(":common")
+include(":feature-game")

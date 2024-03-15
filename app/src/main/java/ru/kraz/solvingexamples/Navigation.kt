@@ -5,6 +5,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import ru.kraz.feature_game.presentation.GameFragment
 import ru.kraz.feature_menu.MenuFragment
 import ru.kraz.feature_menu.MenuRouter
 
@@ -21,8 +22,8 @@ interface Navigation<T> {
             screen.value = value
         }
 
-        override fun openGame() {
-
+        override fun openGame(id: Int, mode: Boolean) {
+            update(GameScreen(id, mode))
         }
 
         override fun coup() {
@@ -67,3 +68,7 @@ interface Screen {
 }
 
 class MenuScreen : Screen.Replace(MenuFragment.newInstance())
+class GameScreen(
+    private val id: Int,
+    private val mode: Boolean
+) : Screen.ReplaceWithAddToBackStack(fragment = GameFragment.newInstance(id, mode))
