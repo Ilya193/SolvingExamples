@@ -1,6 +1,5 @@
 package ru.kraz.feature_game.presentation
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -9,41 +8,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.kraz.feature_game.R
 import ru.kraz.feature_game.databinding.ItemSolutionLayoutBinding
-import ru.kraz.feature_game.databinding.ItemsSolutionLayoutBinding
-
-class SolutionsAdapter(
-    private val select: (Int, Int) -> Unit
-) : ListAdapter<SolutionsUi, SolutionsAdapter.ViewHolder>(DiffSolutions()) {
-
-    inner class ViewHolder(private val view: ItemsSolutionLayoutBinding) :
-        RecyclerView.ViewHolder(view.root) {
-
-        private val adapter = SolutionAdapter {
-            select(adapterPosition, it)
-        }
-
-        init {
-            view.root.adapter = adapter
-        }
-
-        fun bind(item: SolutionsUi) {
-            adapter.submitList(item.solutions)
-        }
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(
-            ItemsSolutionLayoutBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
-        )
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
-}
 
 class SolutionAdapter(
     private val select: (Int) -> Unit
@@ -66,7 +30,7 @@ class SolutionAdapter(
         fun bindSelect(item: SolutionUi) {
             val color = ContextCompat.getColor(
                 view.root.context,
-                if (item.selected) R.color.blue else R.color.dark
+                if (item.selected) R.color.blue else R.color.solution
             )
             view.root.setCardBackgroundColor(color)
         }
@@ -89,15 +53,6 @@ class SolutionAdapter(
         if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads)
         else holder.bindSelect(getItem(position))
     }
-}
-
-class DiffSolutions : DiffUtil.ItemCallback<SolutionsUi>() {
-    override fun areItemsTheSame(oldItem: SolutionsUi, newItem: SolutionsUi): Boolean =
-        oldItem.id == newItem.id
-
-    override fun areContentsTheSame(oldItem: SolutionsUi, newItem: SolutionsUi): Boolean =
-        oldItem == newItem
-
 }
 
 class DiffSolution : DiffUtil.ItemCallback<SolutionUi>() {

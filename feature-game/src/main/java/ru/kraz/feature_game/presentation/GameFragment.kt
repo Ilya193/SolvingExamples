@@ -35,10 +35,12 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
         binding.examples.adapter = examplesAdapter
         binding.examples.isUserInputEnabled = false
 
-        val solutionsAdapter = SolutionAdapter(select = viewModel::select)
+        val solutionsAdapter = SolutionAdapter(select = {
+            viewModel.select(page = binding.examples.currentItem, it)
+        })
         binding.solutionOptions.adapter = solutionsAdapter
 
-        /*viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect {
                     binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
@@ -47,16 +49,15 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
                     binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
                     binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
 
-                    println("s149 $it")
                     if (it is GameUiState.Success) {
                         examplesAdapter.submitList(it.examples)
                         solutionsAdapter.submitList(it.solutions)
                     }
                 }
             }
-        }*/
+        }
 
-        viewModel.uiState.observe(viewLifecycleOwner) {
+        /*viewModel.uiState.observe(viewLifecycleOwner) {
             binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
             binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
             binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
@@ -64,18 +65,17 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
             binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
 
             if (it is GameUiState.Success) {
-                println("s149 ${it.solutions[binding.examples.currentItem].solutions}")
                 examplesAdapter.submitList(it.examples)
-                solutionsAdapter.submitList(it.solutions[binding.examples.currentItem].solutions)
+                solutionsAdapter.submitList(it.testSolutions)
             }
-        }
+        }*/
 
         viewModel.init(id)
 
         binding.btnAnswer.setOnClickListener {
-            binding.examples.currentItem = binding.examples.currentItem + 1
-            viewModel.answer()
-            //binding.solutionOptions.currentItem = binding.solutionOptions.currentItem + 1
+            val newItem = binding.examples.currentItem + 1
+            binding.examples.currentItem = newItem
+            viewModel.answer(newItem)
         }
     }
 

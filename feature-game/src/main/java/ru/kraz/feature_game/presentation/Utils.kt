@@ -6,10 +6,6 @@ object Utils {
     fun ExampleDomain.toExampleUi(): ExampleUi =
         ExampleUi(id, example, correctAnswer)
 
-    fun ExampleDomain.toSolutionsUi(): SolutionsUi =
-        SolutionsUi(id, solutions.toSolutionUi(id))
-
-    private fun List<String>.toSolutionUi(id: Int): MutableList<SolutionUi> = map {
-        SolutionUi(id, it)
-    }.toMutableList()
+    fun ExampleDomain.toSolutionUi(solution: String): SolutionUi =
+        SolutionUi(id, solution)
 }
