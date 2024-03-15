@@ -38,6 +38,7 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
             binding.examples.isUserInputEnabled = false
 
             val solutionsAdapter = SolutionAdapter(select = {
+
                 viewModel.select(page = binding.examples.currentItem, it)
             })
             binding.solutionOptions.adapter = solutionsAdapter
@@ -52,6 +53,7 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
                         binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
 
                         if (it is GameUiState.Success) {
+                            binding.btnAnswer.isEnabled = it.solutions.any { it.selected }
                             examplesAdapter.submitList(it.examples)
                             solutionsAdapter.submitList(it.solutions)
                         }
