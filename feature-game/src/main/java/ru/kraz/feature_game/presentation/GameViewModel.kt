@@ -11,6 +11,8 @@ import ru.kraz.common.StringErrorProvider
 import ru.kraz.feature_game.domain.GameRepository
 import ru.kraz.feature_game.presentation.Utils.toExampleUi
 import ru.kraz.feature_game.presentation.Utils.toSolutionUi
+import java.util.Timer
+import java.util.TimerTask
 
 class GameViewModel(
     private val router: GameRouter,
@@ -23,8 +25,23 @@ class GameViewModel(
 
     private val solvedExamples = mutableListOf<SolvedExample>()
 
+    private val _vibrateState = MutableStateFlow(true)
+    val vibrateState: StateFlow<Boolean> get() = _vibrateState
+
     private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Loading)
     val uiState: StateFlow<GameUiState> get() = _uiState
+
+    private var timer = Timer()
+    private var sec = 0
+
+    private fun initTimer() {
+        timer = Timer()
+        timer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                sec++
+            }
+        }, 0, 1000)
+    }
 
     fun init(id: Int) = viewModelScope.launch(Dispatchers.IO) {
         when (val res = repository.fetchLevel(id)) {
@@ -73,9 +90,14 @@ class GameViewModel(
         val answer = list.first { it.selected }
         val index = list.indexOf(answer)
         if (page < solutions.size) {
-            if (examples[page - 1].correctAnswer == index)
+            _vibrateState.value = if (examples[page - 1].correctAnswer == index) {
                 solvedExamples[page - 1] = solvedExamples[page - 1].copy(solved = true)
-            else solvedExamples[page - 1] = solvedExamples[page - 1].copy(solved = false)
+                true
+            }
+            else {
+                solvedExamples[page - 1] = solvedExamples[page - 1].copy(solved = false)
+                false
+            }
             _uiState.value =
                 GameUiState.Success(
                     examples = examples.toList(),

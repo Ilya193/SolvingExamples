@@ -1,6 +1,10 @@
 package ru.kraz.feature_game.presentation
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +19,10 @@ import ru.kraz.feature_game.databinding.FragmentGameBinding
 class GameFragment : BaseFragment<FragmentGameBinding>() {
 
     private val viewModel: GameViewModel by viewModel()
+
+    private val vibrator: Vibrator by lazy {
+        requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    }
 
     private var id = -1
     private var mode = false
@@ -47,19 +55,35 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
 
             viewLifecycleOwner.lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    viewModel.uiState.collect {
-                        binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
-                        binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                        binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                        binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                        binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
-                        binding.solvedList.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                    launch {
+                        viewModel.uiState.collect {
+                            binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
+                            binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                            binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                            binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                            binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
+                            binding.solvedList.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
 
-                        if (it is GameUiState.Success) {
-                            binding.btnAnswer.isEnabled = it.solutions.any { it.selected }
-                            examplesAdapter.submitList(it.examples)
-                            solutionsAdapter.submitList(it.solutions)
-                            solvedAdapter.submitList(it.solvedExamples)
+                            if (it is GameUiState.Success) {
+                                binding.btnAnswer.isEnabled = it.solutions.any { it.selected }
+                                examplesAdapter.submitList(it.examples)
+                                solutionsAdapter.submitList(it.solutions)
+                                solvedAdapter.submitList(it.solvedExamples)
+                            }
+                        }
+                    }
+                    launch {
+                        viewModel.vibrateState.collect {
+                            if (!it) {
+                                if (Build.VERSION.SDK_INT >= 26)
+                                    vibrator.vibrate(
+                                        VibrationEffect.createOneShot(
+                                            50,
+                                            VibrationEffect.DEFAULT_AMPLITUDE
+                                        )
+                                    )
+                                else vibrator.vibrate(50)
+                            }
                         }
                     }
                 }
