@@ -3,15 +3,15 @@ package ru.kraz.feature_menu
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import ru.kraz.common.BaseDiffUtil
 import ru.kraz.feature_menu.databinding.ItemLevelLayoutBinding
 
 class LevelsAdapter(
     private val expand: (Int) -> Unit,
     private val start: (Int, Boolean) -> Unit
-) : ListAdapter<LevelUi, LevelsAdapter.ViewHolder>(Diff()) {
+) : ListAdapter<LevelUi, LevelsAdapter.ViewHolder>(DiffLevels()) {
 
     inner class ViewHolder(private val view: ItemLevelLayoutBinding) : RecyclerView.ViewHolder(view.root) {
 
@@ -58,14 +58,4 @@ class LevelsAdapter(
     }
 }
 
-class Diff : DiffUtil.ItemCallback<LevelUi>() {
-
-    override fun areItemsTheSame(oldItem: LevelUi, newItem: LevelUi): Boolean =
-        oldItem.id == newItem.id
-
-    override fun areContentsTheSame(oldItem: LevelUi, newItem: LevelUi): Boolean =
-        oldItem == newItem
-
-    override fun getChangePayload(oldItem: LevelUi, newItem: LevelUi): Any? =
-        oldItem.expanded != newItem.expanded
-}
+class DiffLevels : BaseDiffUtil<LevelUi>()

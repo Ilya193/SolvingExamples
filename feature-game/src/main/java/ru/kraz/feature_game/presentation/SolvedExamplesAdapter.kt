@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import ru.kraz.common.BaseDiffUtil
 import ru.kraz.feature_game.R
 import ru.kraz.feature_game.databinding.ItemSolvedLayoutBinding
 
@@ -41,14 +42,4 @@ class SolvedExamplesAdapter : ListAdapter<SolvedExample, SolvedExamplesAdapter.V
     }
 }
 
-class DiffSolved : DiffUtil.ItemCallback<SolvedExample>() {
-    override fun areItemsTheSame(oldItem: SolvedExample, newItem: SolvedExample): Boolean =
-        oldItem.id == newItem.id
-
-    override fun areContentsTheSame(oldItem: SolvedExample, newItem: SolvedExample): Boolean =
-        oldItem == newItem
-
-    override fun getChangePayload(oldItem: SolvedExample, newItem: SolvedExample): Any? =
-        oldItem.solved != newItem.solved
-
-}
+class DiffSolved : BaseDiffUtil<SolvedExample>()

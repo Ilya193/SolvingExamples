@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import ru.kraz.common.BaseDiffUtil
 import ru.kraz.feature_game.databinding.ItemExampleLayoutBinding
 
 class ExamplesAdapter : ListAdapter<ExampleUi, ExamplesAdapter.ViewHolder>(DiffExamples()) {
@@ -23,11 +24,4 @@ class ExamplesAdapter : ListAdapter<ExampleUi, ExamplesAdapter.ViewHolder>(DiffE
     }
 }
 
-class DiffExamples : DiffUtil.ItemCallback<ExampleUi>() {
-    override fun areItemsTheSame(oldItem: ExampleUi, newItem: ExampleUi): Boolean =
-        oldItem.id == newItem.id
-
-    override fun areContentsTheSame(oldItem: ExampleUi, newItem: ExampleUi): Boolean =
-        oldItem == newItem
-
-}
+class DiffExamples : BaseDiffUtil<ExampleUi>()
