@@ -3,8 +3,7 @@ package ru.kraz.solvingexamples
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import ru.kraz.feature_game.presentation.GameFragment
@@ -13,12 +12,14 @@ import ru.kraz.feature_game_result.GameResultFragment
 import ru.kraz.feature_game_result.GameResultRouter
 import ru.kraz.feature_menu.MenuFragment
 import ru.kraz.feature_menu.MenuRouter
+import ru.kraz.feature_setting_timer.SettingTimerFragment
+import ru.kraz.feature_setting_timer.SettingTimerRouter
 
 interface Navigation<T> {
     fun read(): StateFlow<T>
     fun update(value: T)
 
-    class Base : Navigation<Screen>, MenuRouter, GameRouter, GameResultRouter {
+    class Base : Navigation<Screen>, MenuRouter, GameRouter, GameResultRouter, SettingTimerRouter {
         private val screen = MutableStateFlow<Screen>(Screen.Empty)
 
         override fun read(): StateFlow<Screen> = screen
@@ -31,8 +32,21 @@ interface Navigation<T> {
             update(GameScreen(id, mode))
         }
 
-        override fun openGameResult(solved: Int, unSolved: Int, timeSpent: Int) {
-            update(GameResultScreen(solved, unSolved, timeSpent))
+        override fun openGame(id: Int, maxSec: Int) {
+            update(GameScreen(id, true, maxSec))
+        }
+
+        override fun openSettingTimer(id: Int) {
+            update(SettingTimerScreen(id))
+        }
+
+        override fun openGameResult(
+            solved: Int,
+            unSolved: Int,
+            timeSpent: Int,
+            levelPassed: Boolean
+        ) {
+            update(GameResultScreen(solved, unSolved, timeSpent, levelPassed))
         }
 
         override fun openMenu() {
@@ -46,7 +60,6 @@ interface Navigation<T> {
         override fun comeback() {
             update(Screen.Pop)
         }
-
     }
 }
 
@@ -86,6 +99,14 @@ interface Screen {
         }
     }
 
+    abstract class BottomSheet(
+        private val fragment: BottomSheetDialogFragment
+    ) : Screen {
+        override fun show(supportFragmentManager: FragmentManager, container: Int) {
+            fragment.show(supportFragmentManager, null)
+        }
+    }
+
     data object Pop : Screen {
         override fun show(supportFragmentManager: FragmentManager, container: Int) {
             supportFragmentManager.popBackStack()
@@ -100,11 +121,24 @@ interface Screen {
 class MenuScreen : Screen.Replace(MenuFragment.newInstance())
 class GameScreen(
     id: Int,
-    mode: Boolean
-) : Screen.ReplaceWithAddToBackStack(fragment = GameFragment.newInstance(id, mode))
+    mode: Boolean,
+    seconds: Int = 3600
+) : Screen.ReplaceWithAddToBackStack(fragment = GameFragment.newInstance(id, mode, seconds))
 
 class GameResultScreen(
     solved: Int,
     unSolved: Int,
-    timeSpent: Int
-) : Screen.ReplaceWithClear(fragment = GameResultFragment.newInstance(solved, unSolved, timeSpent))
+    timeSpent: Int,
+    levelPassed: Boolean
+) : Screen.ReplaceWithClear(
+    fragment = GameResultFragment.newInstance(
+        solved,
+        unSolved,
+        timeSpent,
+        levelPassed
+    )
+)
+
+class SettingTimerScreen(
+    id: Int,
+) : Screen.BottomSheet(SettingTimerFragment.newInstance(id))

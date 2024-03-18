@@ -9,12 +9,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.kraz.common.BaseFragment
+import ru.kraz.feature_game.R
 import ru.kraz.feature_game.databinding.FragmentGameBinding
 
 class GameFragment : BaseFragment<FragmentGameBinding>() {
@@ -27,6 +29,7 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
 
     private var id = -1
     private var mode = false
+    private var maxSec = 3600
 
     private var cacheTime = 0
 
@@ -43,6 +46,7 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
         super.onCreate(savedInstanceState)
         id = requireArguments().getInt(KEY_ID)
         mode = requireArguments().getBoolean(KEY_MODE)
+        maxSec = requireArguments().getInt(MAX_SECONDS)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -96,18 +100,27 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
                 launch {
                     if (mode)
                         viewModel.timerUiState.collect {
+                            binding.icTimer.visibility = View.VISIBLE
+                            binding.tvTime.visibility = View.VISIBLE
+
                             if (it is TimerUiState.Tick) {
-                                binding.icTimer.visibility = View.VISIBLE
-                                binding.tvTime.visibility = View.VISIBLE
                                 binding.tvTime.text = it.time
                                 cacheTime = it.sec
+                            }
+
+                            if (it is TimerUiState.Finish) {
+                                binding.btnAnswer.isEnabled = false
+                                binding.tvTime.text = it.time
+                                binding.tvTime.apply {
+                                    setTextColor(ContextCompat.getColor(context, R.color.red))
+                                }
                             }
                         }
                 }
             }
         }
 
-        viewModel.init(id, mode)
+        viewModel.init(id, mode, maxSec)
     }
 
     private fun settingClickListener() {
@@ -147,12 +160,14 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
     companion object {
         private const val KEY_ID = "KEY_ID"
         private const val KEY_MODE = "KEY_MODE"
+        private const val MAX_SECONDS = "MAX_SECONDS"
 
-        fun newInstance(id: Int, mode: Boolean) =
+        fun newInstance(id: Int, mode: Boolean, seconds: Int = 3600) =
             GameFragment().apply {
                 arguments = Bundle().apply {
                     putInt(KEY_ID, id)
                     putBoolean(KEY_MODE, mode)
+                    putInt(MAX_SECONDS, seconds)
                 }
             }
     }

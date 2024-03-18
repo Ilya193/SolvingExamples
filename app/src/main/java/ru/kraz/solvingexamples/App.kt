@@ -20,6 +20,8 @@ import ru.kraz.feature_game_result.GameResultRouter
 import ru.kraz.feature_game_result.GameResultViewModel
 import ru.kraz.feature_menu.MenuRouter
 import ru.kraz.feature_menu.MenuViewModel
+import ru.kraz.feature_setting_timer.SettingTimerRouter
+import ru.kraz.feature_setting_timer.SettingTimerViewModel
 
 class App : Application() {
 
@@ -48,6 +50,10 @@ val appModule = module {
     }
 
     single<GameResultRouter> {
+        navigation
+    }
+
+    single<SettingTimerRouter> {
         navigation
     }
 
@@ -81,5 +87,9 @@ val appModule = module {
 
     viewModel<GameResultViewModel> {
         GameResultViewModel(get())
+    }
+
+    viewModel<SettingTimerViewModel> {
+        SettingTimerViewModel(get())
     }
 }

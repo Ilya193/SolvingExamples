@@ -23,7 +23,11 @@ class MenuFragment : BaseFragment<FragmentMenuBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val adapter = LevelsAdapter(expand = viewModel::expand, start = viewModel::start)
+        val adapter = LevelsAdapter(
+            expand = viewModel::expand,
+            start = viewModel::start,
+            settingTimer = viewModel::settingTimer
+        )
         binding.levels.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {

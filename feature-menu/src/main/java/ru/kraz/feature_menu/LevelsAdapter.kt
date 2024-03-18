@@ -11,7 +11,8 @@ import ru.kraz.feature_menu.databinding.ItemLevelLayoutBinding
 
 class LevelsAdapter(
     private val expand: (Int) -> Unit,
-    private val start: (Int, Boolean) -> Unit
+    private val start: (Int, Boolean) -> Unit,
+    private val settingTimer: (Int) -> Unit
 ) : BaseListAdapter<LevelUi, LevelsAdapter.ViewHolder>(DiffLevels()) {
     inner class ViewHolder(private val view: ItemLevelLayoutBinding) : BaseViewHolder<LevelUi>(view.root) {
 
@@ -24,6 +25,10 @@ class LevelsAdapter(
             view.tvStart.setOnClickListener {
                 if (adapterPosition != RecyclerView.NO_POSITION)
                     start(getItem(adapterPosition).id, view.checkClock.isChecked)
+            }
+
+            view.checkClock.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) settingTimer(getItem(adapterPosition).id)
             }
         }
 

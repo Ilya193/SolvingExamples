@@ -14,6 +14,9 @@ import ru.kraz.feature_game.presentation.Utils.toExampleUi
 import ru.kraz.feature_game.presentation.Utils.toSolutionUi
 import java.util.Timer
 import java.util.TimerTask
+import kotlin.concurrent.schedule
+import kotlin.concurrent.scheduleAtFixedRate
+import kotlin.concurrent.timerTask
 
 class GameViewModel(
     private val router: GameRouter,
@@ -32,26 +35,28 @@ class GameViewModel(
     val gameUiState: StateFlow<GameUiState> get() = _gameUiState
 
     private var sec = 0
+    private var maxSec = 3600
     private var timer = Timer()
     private val _timerUiState = MutableStateFlow<TimerUiState>(TimerUiState.Loading)
     val timerUiState: StateFlow<TimerUiState> get() = _timerUiState
 
     private fun initTimer() {
         timer = Timer()
-        timer.scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                println("s149 Timer")
-                if (sec == 3600) {
-                    cancelTimer()
-                    comeback()
-                }
-                else {
-                    val displayTime = sec.convertToTime()
-                    _timerUiState.value = TimerUiState.Tick(sec, displayTime)
-                    sec++
+        timer.scheduleAtFixedRate(0, 1000) {
+            println("s149 Timer $maxSec")
+            val displayTime = sec.convertToTime()
+            if (sec == maxSec) {
+                cancelTimer()
+                _timerUiState.value = TimerUiState.Finish(displayTime)
+                Timer().schedule(1000) {
+                    openGameResult()
                 }
             }
-        }, 1000, 1000)
+            else {
+                _timerUiState.value = TimerUiState.Tick(sec, displayTime)
+                sec++
+            }
+        }
     }
 
     fun initTimer(cacheTime: Int) {
@@ -62,7 +67,7 @@ class GameViewModel(
         timer.cancel()
     }
 
-    fun init(id: Int, mode: Boolean) = viewModelScope.launch(Dispatchers.IO) {
+    fun init(id: Int, mode: Boolean, maxSec: Int) = viewModelScope.launch(Dispatchers.IO) {
         when (val res = repository.fetchLevel(id)) {
             is ResultFDS.Success -> {
                 examples.addAll(res.data.map { it.toExampleUi() })
@@ -75,7 +80,10 @@ class GameViewModel(
                     SolvedExample(it, "${it + 1}")
                 })
                 setGameState(solutions[0])
-                if (mode) initTimer()
+                if (mode) {
+                    this@GameViewModel.maxSec = maxSec
+                    initTimer()
+                }
             }
 
             is ResultFDS.Error -> _gameUiState.value = GameUiState.Error(res.e.getData())
@@ -108,11 +116,9 @@ class GameViewModel(
             cancelTimer()
             setVibrateState(prevPage, indexAnswer)
             setGameState(solutions[prevPage])
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    openGameResult()
-                }
-            }, 250)
+            Timer().schedule(250) {
+                openGameResult()
+            }
         }
     }
 
@@ -134,7 +140,8 @@ class GameViewModel(
     private fun openGameResult() {
         val solved = solvedExamples.count { it.solved == true }
         val unSolved = solvedExamples.count { it.solved == false }
-        router.openGameResult(solved, unSolved, sec)
+        val levelPassed = solved == solvedExamples.size && unSolved == 0
+        router.openGameResult(solved, unSolved, sec, levelPassed)
     }
 
     fun comeback() = router.comeback()

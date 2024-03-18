@@ -39,5 +39,7 @@ class MenuViewModel(
         router.openGame(id, mode)
     }
 
+    fun settingTimer(id: Int) = router.openSettingTimer(id)
+
     fun coup() = router.coup()
 }
