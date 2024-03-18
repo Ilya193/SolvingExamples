@@ -5,4 +5,5 @@
     <color name="solution">#464845</color>
     <color name="green">#00FF2A</color>
     <color name="red">#FF0000</color>
+    <color name="timer">#FFF</color>
 </resources>

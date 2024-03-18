@@ -12,7 +12,7 @@ class MenuViewModel(
 ) : ViewModel() {
 
     private val levels = mutableListOf<LevelUi>().apply {
-        addAll((0..10).map {
+        addAll((0..5).map {
             LevelUi(it, "$it")
         })
     }

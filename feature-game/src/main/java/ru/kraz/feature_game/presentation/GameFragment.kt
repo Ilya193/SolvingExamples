@@ -8,6 +8,7 @@ import android.os.Vibrator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -27,6 +28,14 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
     private var id = -1
     private var mode = false
 
+    private var cacheTime = 0
+
+    private val callback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            viewModel.comeback()
+        }
+    }
+
     override fun bind(inflater: LayoutInflater, container: ViewGroup?): FragmentGameBinding =
         FragmentGameBinding.inflate(inflater, container, false)
 
@@ -38,78 +47,101 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         if (savedInstanceState != null) viewModel.comeback()
         else {
-            val examplesAdapter = ExamplesAdapter()
-            binding.examples.adapter = examplesAdapter
-            binding.examples.isUserInputEnabled = false
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+            settingViewModel()
+            settingClickListener()
+        }
+    }
 
-            val solutionsAdapter = SolutionAdapter(select = {
-                viewModel.select(page = binding.examples.currentItem, it)
-            })
-            binding.solutionOptions.adapter = solutionsAdapter
+    private fun settingClickListener() {
+        binding.btnAnswer.setOnClickListener {
+            val newItem = binding.examples.currentItem + 1
+            binding.examples.currentItem = newItem
+            viewModel.answer(newItem)
+        }
+    }
 
-            val solvedAdapter = SolvedExamplesAdapter()
-            binding.solvedList.adapter = solvedAdapter
+    private fun settingViewModel() {
+        val examplesAdapter = ExamplesAdapter()
+        binding.examples.adapter = examplesAdapter
+        binding.examples.isUserInputEnabled = false
 
-            viewLifecycleOwner.lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    launch {
-                        viewModel.uiState.collect {
-                            binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
-                            binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                            binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                            binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                            binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
-                            binding.solvedList.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+        val solutionsAdapter = SolutionAdapter(select = {
+            viewModel.select(page = binding.examples.currentItem, it)
+        })
+        binding.solutionOptions.adapter = solutionsAdapter
 
-                            if (it is GameUiState.Success) {
-                                binding.btnAnswer.isEnabled = it.solutions.any { it.selected }
-                                examplesAdapter.submitList(it.examples)
-                                solutionsAdapter.submitList(it.solutions)
-                                solvedAdapter.submitList(it.solvedExamples)
-                            }
-                        }
-                    }
-                    launch {
-                        viewModel.vibrateState.collect {
-                            if (!it) {
-                                if (Build.VERSION.SDK_INT >= 26)
-                                    vibrator.vibrate(
-                                        VibrationEffect.createOneShot(
-                                            50,
-                                            VibrationEffect.DEFAULT_AMPLITUDE
-                                        )
-                                    )
-                                else vibrator.vibrate(50)
-                            }
+        val solvedAdapter = SolvedExamplesAdapter()
+        binding.solvedList.adapter = solvedAdapter
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.gameUiState.collect {
+                        binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
+                        binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                        binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                        binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                        binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
+                        binding.tvError.text = if (it is GameUiState.Error) getString(it.msg) else ""
+                        binding.solvedList.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+
+                        if (it is GameUiState.Success) {
+                            binding.btnAnswer.isEnabled = it.solutions.any { it.selected }
+                            examplesAdapter.submitList(it.examples)
+                            solutionsAdapter.submitList(it.solutions)
+                            solvedAdapter.submitList(it.solvedExamples)
                         }
                     }
                 }
-            }
-
-            /*viewModel.uiState.observe(viewLifecycleOwner) {
-                binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
-                binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
-
-                if (it is GameUiState.Success) {
-                    examplesAdapter.submitList(it.examples)
-                    solutionsAdapter.submitList(it.testSolutions)
+                launch {
+                    viewModel.vibrateState.collect {
+                        if (!it) vibrate()
+                    }
                 }
-            }*/
-
-            viewModel.init(id)
-
-            binding.btnAnswer.setOnClickListener {
-                val newItem = binding.examples.currentItem + 1
-                binding.examples.currentItem = newItem
-                viewModel.answer(newItem)
+                launch {
+                    if (mode)
+                        viewModel.timerUiState.collect {
+                            if (it is TimerUiState.Tick) {
+                                binding.icTimer.visibility = View.VISIBLE
+                                binding.tvTime.visibility = View.VISIBLE
+                                binding.tvTime.text = it.time
+                                cacheTime = it.sec
+                            }
+                        }
+                }
             }
         }
+
+        viewModel.init(id, mode)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (cacheTime != 0 && mode) viewModel.initTimer(cacheTime)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (mode) viewModel.cancelTimer()
+    }
+
+    private fun vibrate() {
+        if (Build.VERSION.SDK_INT >= 26)
+            vibrator.vibrate(
+                VibrationEffect.createOneShot(
+                    50,
+                    VibrationEffect.DEFAULT_AMPLITUDE
+                )
+            )
+        else vibrator.vibrate(50)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        callback.remove()
     }
 
     companion object {

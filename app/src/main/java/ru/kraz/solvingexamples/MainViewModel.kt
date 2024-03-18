@@ -1,6 +1,7 @@
 package ru.kraz.solvingexamples
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.StateFlow
 
 class MainViewModel(
     private val navigation: Navigation<Screen>
@@ -10,5 +11,5 @@ class MainViewModel(
         if (first) navigation.update(MenuScreen())
     }
 
-    fun read() = navigation.read()
+    fun read(): StateFlow<Screen> = navigation.read()
 }

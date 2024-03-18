@@ -47,7 +47,7 @@ val appModule = module {
 
     single<GameService> {
         Retrofit.Builder()
-            .baseUrl("http://192.168.1.2:8080/")
+            .baseUrl("http://192.168.1.7:8080/")
             .addConverterFactory(MoshiConverterFactory.create(Moshi.Builder().add(KotlinJsonAdapterFactory()).build()))
             .build()
             .create(GameService::class.java)
@@ -70,6 +70,6 @@ val appModule = module {
     }
 
     viewModel<GameViewModel> {
-        GameViewModel(get(), get(), get())
+        GameViewModel(get(), get())
     }
 }

@@ -7,8 +7,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import ru.kraz.common.ResultFDS
-import ru.kraz.common.StringErrorProvider
 import ru.kraz.feature_game.domain.GameRepository
+import ru.kraz.feature_game.presentation.Utils.convertToTime
+import ru.kraz.feature_game.presentation.Utils.getData
 import ru.kraz.feature_game.presentation.Utils.toExampleUi
 import ru.kraz.feature_game.presentation.Utils.toSolutionUi
 import java.util.Timer
@@ -16,8 +17,7 @@ import java.util.TimerTask
 
 class GameViewModel(
     private val router: GameRouter,
-    private val repository: GameRepository,
-    private val errorProvider: StringErrorProvider,
+    private val repository: GameRepository
 ) : ViewModel() {
 
     private val examples = mutableListOf<ExampleUi>()
@@ -28,22 +28,41 @@ class GameViewModel(
     private val _vibrateState = MutableStateFlow(true)
     val vibrateState: StateFlow<Boolean> get() = _vibrateState
 
-    private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Loading)
-    val uiState: StateFlow<GameUiState> get() = _uiState
+    private val _gameUiState = MutableStateFlow<GameUiState>(GameUiState.Loading)
+    val gameUiState: StateFlow<GameUiState> get() = _gameUiState
 
-    private var timer = Timer()
     private var sec = 0
+    private var timer = Timer()
+    private val _timerUiState = MutableStateFlow<TimerUiState>(TimerUiState.Loading)
+    val timerUiState: StateFlow<TimerUiState> get() = _timerUiState
 
     private fun initTimer() {
         timer = Timer()
         timer.scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
-                sec++
+                println("s149 Timer")
+                if (sec == 3600) {
+                    cancelTimer()
+                    comeback()
+                }
+                else {
+                    val displayTime = sec.convertToTime()
+                    _timerUiState.value = TimerUiState.Tick(sec, displayTime)
+                    sec++
+                }
             }
-        }, 0, 1000)
+        }, 1000, 1000)
     }
 
-    fun init(id: Int) = viewModelScope.launch(Dispatchers.IO) {
+    fun initTimer(cacheTime: Int) {
+        sec = cacheTime
+    }
+
+    fun cancelTimer() {
+        timer.cancel()
+    }
+
+    fun init(id: Int, mode: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         when (val res = repository.fetchLevel(id)) {
             is ResultFDS.Success -> {
                 examples.addAll(res.data.map { it.toExampleUi() })
@@ -55,57 +74,71 @@ class GameViewModel(
                 solvedExamples.addAll((0..<solutions.size).map {
                     SolvedExample(it, "${it + 1}")
                 })
-                _uiState.value = GameUiState.Success(
-                    examples = examples.toList(),
-                    solutions = solutions[0],
-                    solvedExamples = solvedExamples
-                )
+                setGameState(solutions[0])
+                if (mode) initTimer()
             }
 
-            is ResultFDS.Error -> _uiState.value = GameUiState.Error(errorProvider.getData(res.e))
+            is ResultFDS.Error -> _gameUiState.value = GameUiState.Error(res.e.getData())
         }
     }
 
     fun select(page: Int, solutionIndex: Int) = viewModelScope.launch(Dispatchers.IO) {
-        val list = solutions[page].toMutableList()
-        if (list[solutionIndex].selected) list[solutionIndex] =
-            list[solutionIndex].copy(selected = false)
+        val solutionsOptions = solutions[page].toMutableList()
+        if (solutionsOptions[solutionIndex].selected)
+            solutionsOptions[solutionIndex] = solutionsOptions[solutionIndex].copy(selected = false)
         else {
-            val value = !list[solutionIndex].selected
-            for (i in 0..<list.size) {
-                if (i == solutionIndex) list[i] = list[i].copy(selected = value)
-                else list[i] = list[i].copy(selected = !value)
+            val value = !solutionsOptions[solutionIndex].selected
+            for (i in 0..<solutionsOptions.size) {
+                if (i == solutionIndex) solutionsOptions[i] = solutionsOptions[i].copy(selected = value)
+                else solutionsOptions[i] = solutionsOptions[i].copy(selected = !value)
             }
         }
-        solutions[page] = list
-        _uiState.value = GameUiState.Success(
-            examples = examples.toList(),
-            solutions = list,
-            solvedExamples.toList()
-        )
+        solutions[page] = solutionsOptions
+        setGameState(solutionsOptions)
     }
 
     fun answer(page: Int) = viewModelScope.launch(Dispatchers.IO) {
-        val list = solutions[page - 1]
-        val answer = list.first { it.selected }
-        val index = list.indexOf(answer)
+        val prevPage = page - 1
+        val solutionOptions = solutions[prevPage]
+        val indexAnswer = solutionOptions.indexOfFirst { it.selected }
         if (page < solutions.size) {
-            _vibrateState.value = if (examples[page - 1].correctAnswer == index) {
-                solvedExamples[page - 1] = solvedExamples[page - 1].copy(solved = true)
-                true
-            }
-            else {
-                solvedExamples[page - 1] = solvedExamples[page - 1].copy(solved = false)
-                false
-            }
-            _uiState.value =
-                GameUiState.Success(
-                    examples = examples.toList(),
-                    solutions = solutions[page],
-                    solvedExamples.toList()
-                )
+            setVibrateState(prevPage, indexAnswer)
+            setGameState(solutions[page])
+        } else if (page == solutions.size) {
+            cancelTimer()
+            setVibrateState(prevPage, indexAnswer)
+            setGameState(solutions[prevPage])
+            Timer().schedule(object : TimerTask() {
+                override fun run() {
+                    comeback()
+                }
+            }, 250)
         }
     }
 
+    private fun setVibrateState(prevPage: Int, indexAnswer: Int) {
+        _vibrateState.value = if (examples[prevPage].correctAnswer == indexAnswer) {
+            solvedExamples[prevPage] = solvedExamples[prevPage].copy(solved = true)
+            true
+        } else {
+            solvedExamples[prevPage] = solvedExamples[prevPage].copy(solved = false)
+            false
+        }
+    }
+
+    private fun setGameState(solutions: MutableList<SolutionUi>) {
+        _gameUiState.value =
+            GameUiState.Success(
+                examples = examples.toList(),
+                solutions = solutions,
+                solvedExamples.toList()
+            )
+    }
+
     fun comeback() = router.comeback()
+
+    override fun onCleared() {
+        super.onCleared()
+        cancelTimer()
+    }
 }

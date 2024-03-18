@@ -6,4 +6,5 @@
     <color name="solution">#CCCFCA</color>
     <color name="green">#00FF2A</color>
     <color name="red">#FF0000</color>
+    <color name="timer">#000000</color>
 </resources>

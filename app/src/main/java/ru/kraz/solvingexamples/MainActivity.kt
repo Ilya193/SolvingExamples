@@ -1,9 +1,10 @@
 package ru.kraz.solvingexamples
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.WindowManager
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.kraz.solvingexamples.databinding.ActivityMainBinding
@@ -21,8 +22,12 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.init(savedInstanceState == null)
 
-        viewModel.read().observe(this) {
-            it.show(supportFragmentManager, R.id.fragmentContainer)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                viewModel.read().collect {
+                    it.show(supportFragmentManager, R.id.fragmentContainer)
+                }
+            }
         }
     }
 }

@@ -5,19 +5,21 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import ru.kraz.feature_game.presentation.GameFragment
 import ru.kraz.feature_game.presentation.GameRouter
 import ru.kraz.feature_menu.MenuFragment
 import ru.kraz.feature_menu.MenuRouter
 
 interface Navigation<T> {
-    fun read(): LiveData<T>
+    fun read(): StateFlow<T>
     fun update(value: T)
 
     class Base : Navigation<Screen>, MenuRouter, GameRouter {
-        private val screen = MutableLiveData<Screen>()
+        private val screen = MutableStateFlow<Screen>(Screen.Empty)
 
-        override fun read(): LiveData<Screen> = screen
+        override fun read(): StateFlow<Screen> = screen
 
         override fun update(value: Screen) {
             screen.value = value
@@ -70,10 +72,12 @@ interface Screen {
     }
 
     data object Coup : Screen
+
+    data object Empty : Screen
 }
 
 class MenuScreen : Screen.Replace(MenuFragment.newInstance())
 class GameScreen(
-    private val id: Int,
-    private val mode: Boolean
+    id: Int,
+    mode: Boolean
 ) : Screen.ReplaceWithAddToBackStack(fragment = GameFragment.newInstance(id, mode))
