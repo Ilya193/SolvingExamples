@@ -110,7 +110,7 @@ class GameViewModel(
             setGameState(solutions[prevPage])
             Timer().schedule(object : TimerTask() {
                 override fun run() {
-                    comeback()
+                    openGameResult()
                 }
             }, 250)
         }
@@ -129,6 +129,12 @@ class GameViewModel(
                 solutions = solutions,
                 solvedExamples.toList()
             )
+    }
+
+    private fun openGameResult() {
+        val solved = solvedExamples.count { it.solved == true }
+        val unSolved = solvedExamples.count { it.solved == false }
+        router.openGameResult(solved, unSolved, sec)
     }
 
     fun comeback() = router.comeback()

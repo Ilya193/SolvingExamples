@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import ru.kraz.feature_game.presentation.GameFragment
 import ru.kraz.feature_game.presentation.GameRouter
+import ru.kraz.feature_game_result.GameResultFragment
+import ru.kraz.feature_game_result.GameResultRouter
 import ru.kraz.feature_menu.MenuFragment
 import ru.kraz.feature_menu.MenuRouter
 
@@ -16,7 +18,7 @@ interface Navigation<T> {
     fun read(): StateFlow<T>
     fun update(value: T)
 
-    class Base : Navigation<Screen>, MenuRouter, GameRouter {
+    class Base : Navigation<Screen>, MenuRouter, GameRouter, GameResultRouter {
         private val screen = MutableStateFlow<Screen>(Screen.Empty)
 
         override fun read(): StateFlow<Screen> = screen
@@ -27,6 +29,14 @@ interface Navigation<T> {
 
         override fun openGame(id: Int, mode: Boolean) {
             update(GameScreen(id, mode))
+        }
+
+        override fun openGameResult(solved: Int, unSolved: Int, timeSpent: Int) {
+            update(GameResultScreen(solved, unSolved, timeSpent))
+        }
+
+        override fun openMenu() {
+            update(MenuScreen())
         }
 
         override fun coup() {
@@ -50,6 +60,17 @@ interface Screen {
             supportFragmentManager.commit {
                 replace(container, fragment)
             }
+        }
+    }
+
+    abstract class ReplaceWithClear(
+        fragment: Fragment
+    ) : Replace(fragment) {
+        override fun show(supportFragmentManager: FragmentManager, container: Int) {
+            repeat(supportFragmentManager.backStackEntryCount) {
+                supportFragmentManager.popBackStack()
+            }
+            super.show(supportFragmentManager, container)
         }
     }
 
@@ -81,3 +102,9 @@ class GameScreen(
     id: Int,
     mode: Boolean
 ) : Screen.ReplaceWithAddToBackStack(fragment = GameFragment.newInstance(id, mode))
+
+class GameResultScreen(
+    solved: Int,
+    unSolved: Int,
+    timeSpent: Int
+) : Screen.ReplaceWithClear(fragment = GameResultFragment.newInstance(solved, unSolved, timeSpent))

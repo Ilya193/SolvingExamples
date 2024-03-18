@@ -1,5 +1,7 @@
 package ru.kraz.feature_game.presentation
 
+import android.text.Spanned
+import androidx.core.text.HtmlCompat
 import ru.kraz.common.ErrorType
 import ru.kraz.feature_game.R
 import ru.kraz.feature_game.domain.ExampleDomain
@@ -35,4 +37,12 @@ object Utils {
             ErrorType.GENERIC_ERROR -> R.string.generic_error
         }
     }
+
+    fun textFromHtml(text: String, value: String): Spanned =
+        HtmlCompat.fromHtml(
+            String.format(
+                text,
+                value
+            ), HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
 }

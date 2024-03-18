@@ -16,6 +16,8 @@ import ru.kraz.feature_game.domain.GameRepository
 import ru.kraz.feature_game.presentation.BaseStringErrorProvider
 import ru.kraz.feature_game.presentation.GameRouter
 import ru.kraz.feature_game.presentation.GameViewModel
+import ru.kraz.feature_game_result.GameResultRouter
+import ru.kraz.feature_game_result.GameResultViewModel
 import ru.kraz.feature_menu.MenuRouter
 import ru.kraz.feature_menu.MenuViewModel
 
@@ -45,6 +47,10 @@ val appModule = module {
         navigation
     }
 
+    single<GameResultRouter> {
+        navigation
+    }
+
     single<GameService> {
         Retrofit.Builder()
             .baseUrl("http://192.168.1.7:8080/")
@@ -71,5 +77,9 @@ val appModule = module {
 
     viewModel<GameViewModel> {
         GameViewModel(get(), get())
+    }
+
+    viewModel<GameResultViewModel> {
+        GameResultViewModel(get())
     }
 }

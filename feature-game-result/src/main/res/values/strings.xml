@@ -1,0 +1,5 @@
+<resources>
+    <string name="solved">&lt;b>Количество решенных примеров:&lt;/b> %s</string>
+    <string name="unsolved">&lt;b>Количество нерешенных примеров:&lt;/b> %s</string>
+    <string name="timespent">&lt;b>Затрачено времени:&lt;/b> %s сек</string>
+</resources>
