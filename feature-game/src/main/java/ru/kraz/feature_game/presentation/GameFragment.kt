@@ -55,21 +55,13 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
         }
     }
 
-    private fun settingClickListener() {
-        binding.btnAnswer.setOnClickListener {
-            val newItem = binding.examples.currentItem + 1
-            binding.examples.currentItem = newItem
-            viewModel.answer(newItem)
-        }
-    }
-
     private fun settingViewModel() {
         val examplesAdapter = ExamplesAdapter()
         binding.examples.adapter = examplesAdapter
         binding.examples.isUserInputEnabled = false
 
         val solutionsAdapter = SolutionAdapter(select = {
-            viewModel.select(page = binding.examples.currentItem, it)
+            viewModel.select(binding.examples.currentItem, it)
         })
         binding.solutionOptions.adapter = solutionsAdapter
 
@@ -116,6 +108,14 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
         }
 
         viewModel.init(id, mode)
+    }
+
+    private fun settingClickListener() {
+        binding.btnAnswer.setOnClickListener {
+            val newItem = binding.examples.currentItem + 1
+            binding.examples.currentItem = newItem
+            viewModel.answer(newItem)
+        }
     }
 
     override fun onResume() {
