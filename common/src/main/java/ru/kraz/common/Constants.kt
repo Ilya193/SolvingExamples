@@ -3,6 +3,7 @@ package ru.kraz.common
 object Constants {
     const val DEFAULT_ID = -1
     const val MAX_SECONDS = 3600
+    const val MIN_SECONDS = 10
     const val LEVEL_FAILED = -1
     const val VIBRATE_MILLISECONDS = 50L
     const val DEFAULT_CACHE_TIME = 0

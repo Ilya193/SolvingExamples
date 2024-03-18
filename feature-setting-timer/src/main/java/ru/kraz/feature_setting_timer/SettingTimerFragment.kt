@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import ru.kraz.common.Constants
+import ru.kraz.common.Utils
 import ru.kraz.feature_setting_timer.databinding.FragmentSettingTimerBinding
 
 class SettingTimerFragment : BottomSheetDialogFragment() {
@@ -34,11 +36,14 @@ class SettingTimerFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val min = 10
+        var value = Constants.MIN_SECONDS
+        val min = Constants.MIN_SECONDS
+        binding.tvSeconds.text = min.toString() + " " + getString(R.string.seconds)
         binding.seconds.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (progress < min) binding.seconds.progress = 10
-                else binding.tvSeconds.text = progress.toString()
+                value = if (progress < min) Constants.MIN_SECONDS else progress
+                if (progress < min) binding.seconds.progress = Constants.MIN_SECONDS
+                else binding.tvSeconds.text = progress.toString() + " " + getString(R.string.seconds)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -46,8 +51,7 @@ class SettingTimerFragment : BottomSheetDialogFragment() {
         })
 
         binding.btnStart.setOnClickListener {
-            val sec = binding.tvSeconds.text.toString().toInt()
-            viewModel.openGame(exampleId, sec)
+            viewModel.openGame(exampleId, value)
             dismiss()
         }
     }
