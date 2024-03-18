@@ -117,13 +117,9 @@ class GameViewModel(
     }
 
     private fun setVibrateState(prevPage: Int, indexAnswer: Int) {
-        _vibrateState.value = if (examples[prevPage].correctAnswer == indexAnswer) {
-            solvedExamples[prevPage] = solvedExamples[prevPage].copy(solved = true)
-            true
-        } else {
-            solvedExamples[prevPage] = solvedExamples[prevPage].copy(solved = false)
-            false
-        }
+        val isCorrectAnswer = examples[prevPage].correctAnswer == indexAnswer
+        solvedExamples[prevPage] = solvedExamples[prevPage].copy(solved = isCorrectAnswer)
+        _vibrateState.value = isCorrectAnswer
     }
 
     private fun setGameState(solutions: MutableList<SolutionUi>) {
