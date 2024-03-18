@@ -6,14 +6,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.kraz.common.BaseDiffUtil
+import ru.kraz.common.BaseListAdapter
 import ru.kraz.feature_menu.databinding.ItemLevelLayoutBinding
 
 class LevelsAdapter(
     private val expand: (Int) -> Unit,
     private val start: (Int, Boolean) -> Unit
-) : ListAdapter<LevelUi, LevelsAdapter.ViewHolder>(DiffLevels()) {
-
-    inner class ViewHolder(private val view: ItemLevelLayoutBinding) : RecyclerView.ViewHolder(view.root) {
+) : BaseListAdapter<LevelUi, LevelsAdapter.ViewHolder>(DiffLevels()) {
+    inner class ViewHolder(private val view: ItemLevelLayoutBinding) : BaseViewHolder<LevelUi>(view.root) {
 
         init {
             view.root.setOnClickListener {
@@ -27,7 +27,7 @@ class LevelsAdapter(
             }
         }
 
-        fun bind(item: LevelUi) {
+        override fun bind(item: LevelUi) {
             view.tvLevel.text = item.name
             bindSettingStart(item)
         }
@@ -47,10 +47,6 @@ class LevelsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(ItemLevelLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
         if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads)

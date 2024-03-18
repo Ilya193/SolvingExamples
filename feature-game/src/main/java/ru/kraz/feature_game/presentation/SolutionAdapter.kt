@@ -7,15 +7,16 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.kraz.common.BaseDiffUtil
+import ru.kraz.common.BaseListAdapter
 import ru.kraz.feature_game.R
 import ru.kraz.feature_game.databinding.ItemSolutionLayoutBinding
 
 class SolutionAdapter(
     private val select: (Int) -> Unit
-) : ListAdapter<SolutionUi, SolutionAdapter.ViewHolder>(DiffSolution()) {
+) : BaseListAdapter<SolutionUi, SolutionAdapter.ViewHolder>(DiffSolution()) {
 
     inner class ViewHolder(private val view: ItemSolutionLayoutBinding) :
-        RecyclerView.ViewHolder(view.root) {
+        BaseViewHolder<SolutionUi>(view.root) {
 
         init {
             view.root.setOnClickListener {
@@ -23,7 +24,7 @@ class SolutionAdapter(
             }
         }
 
-        fun bind(item: SolutionUi) {
+        override fun bind(item: SolutionUi) {
             view.tvSolution.text = item.solution
             bindSelect(item)
         }
@@ -45,10 +46,6 @@ class SolutionAdapter(
                 false
             )
         )
-
-    override fun onBindViewHolder(holder: SolutionAdapter.ViewHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
         if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads)

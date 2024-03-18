@@ -7,12 +7,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.kraz.common.BaseDiffUtil
+import ru.kraz.common.BaseListAdapter
 import ru.kraz.feature_game.R
 import ru.kraz.feature_game.databinding.ItemSolvedLayoutBinding
 
-class SolvedExamplesAdapter : ListAdapter<SolvedExample, SolvedExamplesAdapter.ViewHolder>(DiffSolved()) {
-    inner class ViewHolder(private val view: ItemSolvedLayoutBinding) : RecyclerView.ViewHolder(view.root) {
-        fun bind(item: SolvedExample) {
+class SolvedExamplesAdapter : BaseListAdapter<SolvedExample, SolvedExamplesAdapter.ViewHolder>(DiffSolved()) {
+    inner class ViewHolder(private val view: ItemSolvedLayoutBinding) : BaseViewHolder<SolvedExample>(view.root) {
+        override fun bind(item: SolvedExample) {
             view.tvSolved.text = item.level
             bindSolved(item)
         }
@@ -31,10 +32,6 @@ class SolvedExamplesAdapter : ListAdapter<SolvedExample, SolvedExamplesAdapter.V
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(ItemSolvedLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
         if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads)
