@@ -8,6 +8,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.kraz.common.BaseFragment
+import ru.kraz.common.Constants
 import ru.kraz.common.Utils
 import ru.kraz.feature_game_result.databinding.FragmentGameResultBinding
 
@@ -15,7 +16,7 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
 
     private val viewModel: GameResultViewModel by viewModel()
 
-    private var id = -1
+    private var id = Constants.DEFAULT_ID
     private var solved = 0
     private var unSolved = 0
     private var time = 0
@@ -23,7 +24,7 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
 
     private val callback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            viewModel.openMenu(id)
+            openMenu()
         }
     }
 
@@ -45,8 +46,7 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
 
         binding.tvLevelPassed.apply {
-            text =
-                if (levelPassed) getString(R.string.level_passed) else getString(R.string.level_failed)
+            text = if (levelPassed) getString(R.string.level_passed) else getString(R.string.level_failed)
             val color = if (levelPassed) R.color.green else R.color.red
             setTextColor(ContextCompat.getColor(context, color))
         }
@@ -61,8 +61,12 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
         }
 
         binding.icHome.setOnClickListener {
-            viewModel.openMenu(id)
+            openMenu()
         }
+    }
+
+    private fun openMenu() {
+        viewModel.openMenu(if (levelPassed) id else Constants.LEVEL_FAILED)
     }
 
     override fun onDestroyView() {

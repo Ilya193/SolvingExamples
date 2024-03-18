@@ -6,6 +6,7 @@ import androidx.fragment.app.commit
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import ru.kraz.common.Constants
 import ru.kraz.feature_game.presentation.GameFragment
 import ru.kraz.feature_game.presentation.GameRouter
 import ru.kraz.feature_game_result.GameResultFragment
@@ -120,12 +121,12 @@ interface Screen {
 }
 
 class MenuScreen(
-    id: Int = -1
+    id: Int = Constants.LEVEL_FAILED
 ) : Screen.Replace(MenuFragment.newInstance(id))
 class GameScreen(
     id: Int,
     mode: Boolean,
-    seconds: Int = 3600
+    seconds: Int = Constants.MAX_SECONDS
 ) : Screen.ReplaceWithAddToBackStack(fragment = GameFragment.newInstance(id, mode, seconds))
 
 class GameResultScreen(

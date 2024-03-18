@@ -16,6 +16,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.kraz.common.BaseFragment
+import ru.kraz.common.Constants
 import ru.kraz.feature_game.R
 import ru.kraz.feature_game.databinding.FragmentGameBinding
 
@@ -27,11 +28,11 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
         requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
 
-    private var id = -1
+    private var id = Constants.DEFAULT_ID
     private var mode = false
-    private var maxSec = 3600
+    private var maxSec = Constants.MAX_SECONDS
 
-    private var cacheTime = 0
+    private var cacheTime = Constants.DEFAULT_CACHE_TIME
 
     private val callback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -100,10 +101,9 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
                 launch {
                     if (mode)
                         viewModel.timerUiState.collect {
-                            binding.icTimer.visibility = View.VISIBLE
-                            binding.tvTime.visibility = View.VISIBLE
-
                             if (it is TimerUiState.Tick) {
+                                binding.icTimer.visibility = View.VISIBLE
+                                binding.tvTime.visibility = View.VISIBLE
                                 binding.tvTime.text = it.time
                                 cacheTime = it.sec
                             }
@@ -145,11 +145,11 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
         if (Build.VERSION.SDK_INT >= 26)
             vibrator.vibrate(
                 VibrationEffect.createOneShot(
-                    50,
+                    Constants.VIBRATE_MILLISECONDS,
                     VibrationEffect.DEFAULT_AMPLITUDE
                 )
             )
-        else vibrator.vibrate(50)
+        else vibrator.vibrate(Constants.VIBRATE_MILLISECONDS)
     }
 
     override fun onDestroyView() {

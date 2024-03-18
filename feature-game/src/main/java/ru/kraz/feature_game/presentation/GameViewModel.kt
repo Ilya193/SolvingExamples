@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import ru.kraz.common.Constants
 import ru.kraz.common.ResultFDS
 import ru.kraz.feature_game.domain.GameRepository
 import ru.kraz.feature_game.presentation.Utils.convertToTime
@@ -34,26 +35,27 @@ class GameViewModel(
     private val _gameUiState = MutableStateFlow<GameUiState>(GameUiState.Loading)
     val gameUiState: StateFlow<GameUiState> get() = _gameUiState
 
-    private var levelId = -1
+    private var levelId = Constants.DEFAULT_ID
     private var sec = 0
-    private var maxSec = 3600
+    private var maxSec = Constants.MAX_SECONDS
     private var timer = Timer()
     private val _timerUiState = MutableStateFlow<TimerUiState>(TimerUiState.Loading)
     val timerUiState: StateFlow<TimerUiState> get() = _timerUiState
 
     private fun initTimer() {
         timer = Timer()
-        timer.scheduleAtFixedRate(0, 1000) {
-            println("s149 Timer $maxSec")
+        timer.scheduleAtFixedRate(
+            0,
+            Constants.PERIOD_TIMER
+        ) {
             val displayTime = sec.convertToTime()
             if (sec == maxSec) {
                 cancelTimer()
                 _timerUiState.value = TimerUiState.Finish(displayTime)
-                Timer().schedule(1000) {
+                Timer().schedule(Constants.PERIOD_TIMER) {
                     openGameResult()
                 }
-            }
-            else {
+            } else {
                 _timerUiState.value = TimerUiState.Tick(sec, displayTime)
                 sec++
             }
@@ -99,7 +101,8 @@ class GameViewModel(
         else {
             val value = !solutionsOptions[solutionIndex].selected
             for (i in 0..<solutionsOptions.size) {
-                if (i == solutionIndex) solutionsOptions[i] = solutionsOptions[i].copy(selected = value)
+                if (i == solutionIndex) solutionsOptions[i] =
+                    solutionsOptions[i].copy(selected = value)
                 else solutionsOptions[i] = solutionsOptions[i].copy(selected = !value)
             }
         }
@@ -118,7 +121,7 @@ class GameViewModel(
             cancelTimer()
             setVibrateState(prevPage, indexAnswer)
             setGameState(solutions[prevPage])
-            Timer().schedule(250) {
+            Timer().schedule(Constants.DELAY_250L) {
                 openGameResult()
             }
         }
