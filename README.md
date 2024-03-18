@@ -1,1 +1,1 @@
-https://github.com/Ilya193/SolvingExamples/assets/40058340/a59c5e20-07ad-42a6-a048-87332f084a9a
+https://github.com/Ilya193/SolvingExamples/assets/40058340/c2557504-ec46-47cf-8595-6137ddf3ed0b
