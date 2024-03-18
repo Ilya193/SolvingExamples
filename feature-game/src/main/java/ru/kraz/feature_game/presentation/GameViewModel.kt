@@ -144,7 +144,7 @@ class GameViewModel(
 
     private fun openGameResult() {
         val solved = solvedExamples.count { it.solved == true }
-        val unSolved = solvedExamples.count { it.solved == false }
+        val unSolved = solvedExamples.count { it.solved == false || it.solved == null }
         val levelPassed = solved == solvedExamples.size && unSolved == 0
         router.openGameResult(levelId, solved, unSolved, sec, levelPassed)
     }
