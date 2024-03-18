@@ -34,6 +34,7 @@ class GameViewModel(
     private val _gameUiState = MutableStateFlow<GameUiState>(GameUiState.Loading)
     val gameUiState: StateFlow<GameUiState> get() = _gameUiState
 
+    private var levelId = -1
     private var sec = 0
     private var maxSec = 3600
     private var timer = Timer()
@@ -68,6 +69,7 @@ class GameViewModel(
     }
 
     fun init(id: Int, mode: Boolean, maxSec: Int) = viewModelScope.launch(Dispatchers.IO) {
+        levelId = id
         when (val res = repository.fetchLevel(id)) {
             is ResultFDS.Success -> {
                 examples.addAll(res.data.map { it.toExampleUi() })
@@ -141,7 +143,7 @@ class GameViewModel(
         val solved = solvedExamples.count { it.solved == true }
         val unSolved = solvedExamples.count { it.solved == false }
         val levelPassed = solved == solvedExamples.size && unSolved == 0
-        router.openGameResult(solved, unSolved, sec, levelPassed)
+        router.openGameResult(levelId, solved, unSolved, sec, levelPassed)
     }
 
     fun comeback() = router.comeback()

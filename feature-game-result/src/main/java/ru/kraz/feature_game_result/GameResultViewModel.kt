@@ -6,5 +6,5 @@ class GameResultViewModel(
     private val router: GameResultRouter
 ) : ViewModel() {
 
-    fun openMenu() = router.openMenu()
+    fun openMenu(id: Int) = router.openMenu(id)
 }

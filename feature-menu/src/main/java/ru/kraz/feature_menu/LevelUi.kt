@@ -6,7 +6,8 @@ data class LevelUi(
     val id: Int,
     val name: String,
     val expanded: Boolean = false,
-    val clock: Boolean = false
+    val clock: Boolean = false,
+    val levelPassed: Boolean = false
 ): DelegateItem {
     override fun id(item: DelegateItem): Boolean = id == (item as LevelUi).id
 

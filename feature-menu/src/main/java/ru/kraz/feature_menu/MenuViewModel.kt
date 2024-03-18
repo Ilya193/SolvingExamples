@@ -13,7 +13,7 @@ class MenuViewModel(
 
     private val levels = mutableListOf<LevelUi>().apply {
         addAll((0..5).map {
-            LevelUi(it, "$it")
+            LevelUi(it, "${it + 1}")
         })
     }
 
@@ -40,6 +40,12 @@ class MenuViewModel(
     }
 
     fun settingTimer(id: Int) = router.openSettingTimer(id)
+
+    fun levelPassed(id: Int) {
+        val index = levels.indexOfFirst { it.id == id }
+        levels[index] = levels[index].copy(levelPassed = true)
+        _uiState.value = levels.toList()
+    }
 
     fun coup() = router.coup()
 }

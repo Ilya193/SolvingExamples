@@ -41,16 +41,17 @@ interface Navigation<T> {
         }
 
         override fun openGameResult(
+            levelId: Int,
             solved: Int,
             unSolved: Int,
             timeSpent: Int,
             levelPassed: Boolean
         ) {
-            update(GameResultScreen(solved, unSolved, timeSpent, levelPassed))
+            update(GameResultScreen(levelId, solved, unSolved, timeSpent, levelPassed))
         }
 
-        override fun openMenu() {
-            update(MenuScreen())
+        override fun openMenu(id: Int) {
+            update(MenuScreen(id))
         }
 
         override fun coup() {
@@ -118,7 +119,9 @@ interface Screen {
     data object Empty : Screen
 }
 
-class MenuScreen : Screen.Replace(MenuFragment.newInstance())
+class MenuScreen(
+    id: Int = -1
+) : Screen.Replace(MenuFragment.newInstance(id))
 class GameScreen(
     id: Int,
     mode: Boolean,
@@ -126,12 +129,14 @@ class GameScreen(
 ) : Screen.ReplaceWithAddToBackStack(fragment = GameFragment.newInstance(id, mode, seconds))
 
 class GameResultScreen(
+    levelId: Int,
     solved: Int,
     unSolved: Int,
     timeSpent: Int,
     levelPassed: Boolean
 ) : Screen.ReplaceWithClear(
     fragment = GameResultFragment.newInstance(
+        levelId,
         solved,
         unSolved,
         timeSpent,

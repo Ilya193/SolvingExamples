@@ -15,6 +15,7 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
 
     private val viewModel: GameResultViewModel by viewModel()
 
+    private var id = -1
     private var solved = 0
     private var unSolved = 0
     private var time = 0
@@ -22,7 +23,7 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
 
     private val callback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            viewModel.openMenu()
+            viewModel.openMenu(id)
         }
     }
 
@@ -31,6 +32,7 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        id = requireArguments().getInt(LEVEL_ID)
         solved = requireArguments().getInt(SOLVED_EXAMPLES)
         unSolved = requireArguments().getInt(UNSOLVED_EXAMPLES)
         time = requireArguments().getInt(TIME_SPENT)
@@ -43,7 +45,8 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
 
         binding.tvLevelPassed.apply {
-            text = if (levelPassed) getString(R.string.level_passed) else getString(R.string.level_failed)
+            text =
+                if (levelPassed) getString(R.string.level_passed) else getString(R.string.level_failed)
             val color = if (levelPassed) R.color.green else R.color.red
             setTextColor(ContextCompat.getColor(context, color))
         }
@@ -58,7 +61,7 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
         }
 
         binding.icHome.setOnClickListener {
-            viewModel.openMenu()
+            viewModel.openMenu(id)
         }
     }
 
@@ -68,14 +71,22 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
     }
 
     companion object {
+        private const val LEVEL_ID = "LEVEL_ID"
         private const val SOLVED_EXAMPLES = "SOLVED_EXAMPLES"
         private const val UNSOLVED_EXAMPLES = "UNSOLVED_EXAMPLES"
         private const val TIME_SPENT = "TIME_SPENT"
         private const val LEVEL_PASSED = "LEVEL_PASSED"
 
-        fun newInstance(solved: Int, unSolved: Int, timeSpent: Int, levelPassed: Boolean) =
+        fun newInstance(
+            levelId: Int,
+            solved: Int,
+            unSolved: Int,
+            timeSpent: Int,
+            levelPassed: Boolean,
+        ) =
             GameResultFragment().apply {
                 arguments = Bundle().apply {
+                    putInt(LEVEL_ID, levelId)
                     putInt(SOLVED_EXAMPLES, solved)
                     putInt(UNSOLVED_EXAMPLES, unSolved)
                     putInt(TIME_SPENT, timeSpent)

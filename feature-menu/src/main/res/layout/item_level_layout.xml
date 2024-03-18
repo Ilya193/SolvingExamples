@@ -13,6 +13,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <ImageView
+            android:id="@+id/icLevelPassed"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:src="@drawable/ic_done"
+            android:layout_gravity="end"
+            android:visibility="invisible"/>
+
         <TextView
             android:id="@+id/tvLevel"
             android:layout_width="wrap_content"

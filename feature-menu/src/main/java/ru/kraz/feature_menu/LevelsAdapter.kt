@@ -35,6 +35,7 @@ class LevelsAdapter(
         override fun bind(item: LevelUi) {
             view.tvLevel.text = item.name
             bindSettingStart(item)
+            view.icLevelPassed.visibility = if (item.levelPassed) View.VISIBLE else View.INVISIBLE
         }
 
         fun bindSettingStart(item: LevelUi) {
