@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
@@ -31,10 +32,8 @@ class MenuFragment : BaseFragment<FragmentMenuBinding>() {
         binding.levels.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect {
-                    adapter.submitList(it)
-                }
+            viewModel.uiState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).collect {
+                adapter.submitList(it)
             }
         }
     }

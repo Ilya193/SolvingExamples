@@ -3,6 +3,7 @@ package ru.kraz.solvingexamples
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
@@ -23,10 +24,8 @@ class MainActivity : AppCompatActivity() {
         viewModel.init(savedInstanceState == null)
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.read().collect {
-                    it.show(supportFragmentManager, R.id.fragmentContainer)
-                }
+            viewModel.read().flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).collect {
+                it.show(supportFragmentManager, R.id.fragmentContainer)
             }
         }
     }

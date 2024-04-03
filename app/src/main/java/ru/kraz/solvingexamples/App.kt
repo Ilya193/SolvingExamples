@@ -6,22 +6,16 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
-import ru.kraz.common.StringErrorProvider
-import ru.kraz.feature_game.data.GameRepositoryImpl
 import ru.kraz.feature_game.data.cache.ExamplesDao
-import ru.kraz.feature_game.domain.GameRepository
-import ru.kraz.feature_game.presentation.BaseStringErrorProvider
+import ru.kraz.feature_game.di.featureGameModule
 import ru.kraz.feature_game.presentation.GameRouter
-import ru.kraz.feature_game.presentation.GameViewModel
 import ru.kraz.feature_game_result.GameResultRouter
-import ru.kraz.feature_game_result.GameResultViewModel
+import ru.kraz.feature_game_result.featureGameResultModule
 import ru.kraz.feature_menu.data.LevelsDao
-import ru.kraz.feature_menu.data.MenuRepositoryImpl
-import ru.kraz.feature_menu.domain.MenuRepository
+import ru.kraz.feature_menu.di.featureMenuModule
 import ru.kraz.feature_menu.presentation.MenuRouter
-import ru.kraz.feature_menu.presentation.MenuViewModel
 import ru.kraz.feature_setting_timer.SettingTimerRouter
-import ru.kraz.feature_setting_timer.SettingTimerViewModel
+import ru.kraz.feature_setting_timer.featureSettingTimerModule
 
 class App : Application() {
 
@@ -29,7 +23,7 @@ class App : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@App)
-            modules(appModule)
+            modules(appModule, featureMenuModule, featureGameModule, featureGameResultModule, featureSettingTimerModule)
         }
     }
 }
@@ -57,18 +51,6 @@ val appModule = module {
         navigation
     }
 
-    factory<GameRepository> {
-        GameRepositoryImpl(get())
-    }
-
-    factory<StringErrorProvider> {
-        BaseStringErrorProvider()
-    }
-
-    factory<MenuRepository> {
-        MenuRepositoryImpl(get())
-    }
-
     single<LevelsDb> {
         Room.databaseBuilder(get(), LevelsDb::class.java, "examples_db")
             .createFromAsset("examples.db")
@@ -85,21 +67,5 @@ val appModule = module {
 
     viewModel<MainViewModel> {
         MainViewModel(get())
-    }
-
-    viewModel<MenuViewModel> {
-        MenuViewModel(get(), get())
-    }
-
-    viewModel<GameViewModel> { params ->
-        GameViewModel(router = get(), levelId = params.get(), repository = get())
-    }
-
-    viewModel<GameResultViewModel> {
-        GameResultViewModel(get())
-    }
-
-    viewModel<SettingTimerViewModel> {
-        SettingTimerViewModel(get())
     }
 }

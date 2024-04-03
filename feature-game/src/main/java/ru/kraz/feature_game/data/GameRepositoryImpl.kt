@@ -20,8 +20,6 @@ class GameRepositoryImpl(
                 val solutionsForExample = solutions.filter { it.exampleId == example.id }
                 example.toExampleDomain(solutionsForExample.map { it.solution })
             })
-        } catch (e: UnknownHostException) {
-            ResultFDS.Error(ErrorType.NO_CONNECTION)
         } catch (e: Exception) {
             ResultFDS.Error(ErrorType.GENERIC_ERROR)
         }
