@@ -11,8 +11,8 @@ import ru.kraz.feature_game.presentation.GameFragment
 import ru.kraz.feature_game.presentation.GameRouter
 import ru.kraz.feature_game_result.GameResultFragment
 import ru.kraz.feature_game_result.GameResultRouter
-import ru.kraz.feature_menu.MenuFragment
-import ru.kraz.feature_menu.MenuRouter
+import ru.kraz.feature_menu.presentation.MenuFragment
+import ru.kraz.feature_menu.presentation.MenuRouter
 import ru.kraz.feature_setting_timer.SettingTimerFragment
 import ru.kraz.feature_setting_timer.SettingTimerRouter
 
@@ -42,17 +42,16 @@ interface Navigation<T> {
         }
 
         override fun openGameResult(
-            levelId: Int,
             solved: Int,
             unSolved: Int,
             timeSpent: Int,
             levelPassed: Boolean
         ) {
-            update(GameResultScreen(levelId, solved, unSolved, timeSpent, levelPassed))
+            update(GameResultScreen(solved, unSolved, timeSpent, levelPassed))
         }
 
-        override fun openMenu(id: Int) {
-            update(MenuScreen(id))
+        override fun openMenu() {
+            update(MenuScreen())
         }
 
         override fun coup() {
@@ -120,9 +119,7 @@ interface Screen {
     data object Empty : Screen
 }
 
-class MenuScreen(
-    id: Int = Constants.LEVEL_FAILED
-) : Screen.Replace(MenuFragment.newInstance(id))
+class MenuScreen: Screen.Replace(MenuFragment.newInstance())
 class GameScreen(
     id: Int,
     mode: Boolean,
@@ -130,14 +127,12 @@ class GameScreen(
 ) : Screen.ReplaceWithAddToBackStack(fragment = GameFragment.newInstance(id, mode, seconds))
 
 class GameResultScreen(
-    levelId: Int,
     solved: Int,
     unSolved: Int,
     timeSpent: Int,
     levelPassed: Boolean
 ) : Screen.ReplaceWithClear(
     fragment = GameResultFragment.newInstance(
-        levelId,
         solved,
         unSolved,
         timeSpent,

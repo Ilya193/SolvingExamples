@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -49,4 +50,9 @@ dependencies {
     implementation(ru.kraz.buildsrc.Libs.koin)
     implementation(ru.kraz.buildsrc.Libs.fragmentKtx)
     implementation(ru.kraz.buildsrc.Libs.coroutines)
+
+    implementation(ru.kraz.buildsrc.Libs.roomRuntime)
+    annotationProcessor(ru.kraz.buildsrc.Libs.roomCompiler)
+    implementation(ru.kraz.buildsrc.Libs.roomKtx)
+    ksp(ru.kraz.buildsrc.Libs.roomCompiler)
 }

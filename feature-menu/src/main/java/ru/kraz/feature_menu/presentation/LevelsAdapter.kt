@@ -1,9 +1,8 @@
-package ru.kraz.feature_menu
+package ru.kraz.feature_menu.presentation
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.kraz.common.BaseDiffUtil
 import ru.kraz.common.BaseListAdapter
@@ -35,7 +34,7 @@ class LevelsAdapter(
         override fun bind(item: LevelUi) {
             view.tvLevel.text = item.name
             bindSettingStart(item)
-            view.icLevelPassed.visibility = if (item.levelPassed) View.VISIBLE else View.INVISIBLE
+            view.icLevelPassed.visibility = if (item.levelPassed == 1) View.VISIBLE else View.INVISIBLE
         }
 
         fun bindSettingStart(item: LevelUi) {

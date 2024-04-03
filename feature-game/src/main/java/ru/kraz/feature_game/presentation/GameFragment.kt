@@ -11,10 +11,11 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import ru.kraz.common.BaseFragment
 import ru.kraz.common.Constants
 import ru.kraz.feature_game.R
@@ -22,7 +23,7 @@ import ru.kraz.feature_game.databinding.FragmentGameBinding
 
 class GameFragment : BaseFragment<FragmentGameBinding>() {
 
-    private val viewModel: GameViewModel by viewModel()
+    private val viewModel: GameViewModel by viewModel { parametersOf(id) }
 
     private val vibrator: Vibrator by lazy {
         requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
@@ -74,50 +75,44 @@ class GameFragment : BaseFragment<FragmentGameBinding>() {
         binding.solvedList.adapter = solvedAdapter
 
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.gameUiState.collect {
-                        binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
-                        binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                        binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                        binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
-                        binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
-                        binding.tvError.text = if (it is GameUiState.Error) getString(it.msg) else ""
-                        binding.solvedList.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+            viewModel.gameUiState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).collect {
+                viewModel.gameUiState.collect {
+                    binding.loading.visibility = if (it is GameUiState.Loading) View.VISIBLE else View.GONE
+                    binding.btnAnswer.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                    binding.examples.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                    binding.solutionOptions.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
+                    binding.containerError.visibility = if (it is GameUiState.Error) View.VISIBLE else View.GONE
+                    binding.tvError.text = if (it is GameUiState.Error) getString(it.msg) else ""
+                    binding.solvedList.visibility = if (it is GameUiState.Success) View.VISIBLE else View.GONE
 
-                        if (it is GameUiState.Success) {
-                            binding.btnAnswer.isEnabled = it.solutions.any { it.selected }
-                            examplesAdapter.submitList(it.examples)
-                            solutionsAdapter.submitList(it.solutions)
-                            solvedAdapter.submitList(it.solvedExamples)
-                        }
+                    if (it is GameUiState.Success) {
+                        binding.btnAnswer.isEnabled = it.solutions.any { it.selected }
+                        examplesAdapter.submitList(it.examples)
+                        solutionsAdapter.submitList(it.solutions)
+                        solvedAdapter.submitList(it.solvedExamples)
                     }
-                }
-                launch {
-                    viewModel.vibrateState.collect {
-                        if (!it) vibrate()
-                    }
-                }
-                launch {
-                    if (mode)
-                        viewModel.timerUiState.collect {
-                            if (it is TimerUiState.Tick) {
-                                binding.icTimer.visibility = View.VISIBLE
-                                binding.tvTime.visibility = View.VISIBLE
-                                binding.tvTime.text = it.time
-                                cacheTime = it.sec
-                            }
-
-                            if (it is TimerUiState.Finish) {
-                                binding.btnAnswer.isEnabled = false
-                                binding.tvTime.text = it.time
-                                binding.tvTime.apply {
-                                    setTextColor(ContextCompat.getColor(context, R.color.red))
-                                }
-                            }
-                        }
                 }
             }
+            viewModel.vibrateState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).collect {
+                if (!it) vibrate()
+            }
+            if (mode)
+                viewModel.timerUiState.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED).collect {
+                    if (it is TimerUiState.Tick) {
+                        binding.icTimer.visibility = View.VISIBLE
+                        binding.tvTime.visibility = View.VISIBLE
+                        binding.tvTime.text = it.time
+                        cacheTime = it.sec
+                    }
+
+                    if (it is TimerUiState.Finish) {
+                        binding.btnAnswer.isEnabled = false
+                        binding.tvTime.text = it.time
+                        binding.tvTime.apply {
+                            setTextColor(ContextCompat.getColor(context, R.color.red))
+                        }
+                    }
+                }
         }
 
         viewModel.init(id, mode, maxSec)

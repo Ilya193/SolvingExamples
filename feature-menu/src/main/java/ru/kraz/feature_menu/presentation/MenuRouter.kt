@@ -1,4 +1,4 @@
-package ru.kraz.feature_menu
+package ru.kraz.feature_menu.presentation
 
 import ru.kraz.common.Router
 

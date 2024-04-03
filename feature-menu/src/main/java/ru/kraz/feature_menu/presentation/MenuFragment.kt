@@ -1,10 +1,9 @@
-package ru.kraz.feature_menu
+package ru.kraz.feature_menu.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.view.menu.MenuView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -18,20 +17,11 @@ class MenuFragment : BaseFragment<FragmentMenuBinding>() {
 
     private val viewModel: MenuViewModel by viewModel()
 
-    private var passedLevelId: Int = Constants.LEVEL_FAILED
-
     override fun bind(inflater: LayoutInflater, container: ViewGroup?): FragmentMenuBinding =
         FragmentMenuBinding.inflate(inflater, container, false)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        passedLevelId = requireArguments().getInt(PASSED_LEVEL_ID)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        if (passedLevelId != Constants.LEVEL_FAILED) viewModel.levelPassed(passedLevelId)
 
         val adapter = LevelsAdapter(
             expand = viewModel::expand,
@@ -55,13 +45,7 @@ class MenuFragment : BaseFragment<FragmentMenuBinding>() {
     }
 
     companion object {
-        private const val PASSED_LEVEL_ID = "PASSED_LEVEL_ID"
-
-        fun newInstance(passedLevelId: Int = Constants.LEVEL_FAILED) =
-            MenuFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(PASSED_LEVEL_ID, passedLevelId)
-                }
-            }
+        fun newInstance() =
+            MenuFragment()
     }
 }

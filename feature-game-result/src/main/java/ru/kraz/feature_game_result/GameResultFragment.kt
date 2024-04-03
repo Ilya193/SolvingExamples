@@ -16,7 +16,6 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
 
     private val viewModel: GameResultViewModel by viewModel()
 
-    private var id = Constants.DEFAULT_ID
     private var solved = 0
     private var unSolved = 0
     private var time = 0
@@ -33,7 +32,6 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        id = requireArguments().getInt(LEVEL_ID)
         solved = requireArguments().getInt(SOLVED_EXAMPLES)
         unSolved = requireArguments().getInt(UNSOLVED_EXAMPLES)
         time = requireArguments().getInt(TIME_SPENT)
@@ -66,7 +64,7 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
     }
 
     private fun openMenu() {
-        viewModel.openMenu(if (levelPassed) id else Constants.LEVEL_FAILED)
+        viewModel.openMenu()
     }
 
     override fun onDestroyView() {
@@ -75,14 +73,12 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
     }
 
     companion object {
-        private const val LEVEL_ID = "LEVEL_ID"
         private const val SOLVED_EXAMPLES = "SOLVED_EXAMPLES"
         private const val UNSOLVED_EXAMPLES = "UNSOLVED_EXAMPLES"
         private const val TIME_SPENT = "TIME_SPENT"
         private const val LEVEL_PASSED = "LEVEL_PASSED"
 
         fun newInstance(
-            levelId: Int,
             solved: Int,
             unSolved: Int,
             timeSpent: Int,
@@ -90,7 +86,6 @@ class GameResultFragment : BaseFragment<FragmentGameResultBinding>() {
         ) =
             GameResultFragment().apply {
                 arguments = Bundle().apply {
-                    putInt(LEVEL_ID, levelId)
                     putInt(SOLVED_EXAMPLES, solved)
                     putInt(UNSOLVED_EXAMPLES, unSolved)
                     putInt(TIME_SPENT, timeSpent)

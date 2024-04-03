@@ -21,6 +21,7 @@ import kotlin.concurrent.timerTask
 
 class GameViewModel(
     private val router: GameRouter,
+    private val levelId: Int,
     private val repository: GameRepository
 ) : ViewModel() {
 
@@ -35,7 +36,6 @@ class GameViewModel(
     private val _gameUiState = MutableStateFlow<GameUiState>(GameUiState.Loading)
     val gameUiState: StateFlow<GameUiState> get() = _gameUiState
 
-    private var levelId = Constants.DEFAULT_ID
     private var sec = 0
     private var maxSec = Constants.MAX_SECONDS
     private var timer = Timer()
@@ -71,7 +71,6 @@ class GameViewModel(
     }
 
     fun init(id: Int, mode: Boolean, maxSec: Int) = viewModelScope.launch(Dispatchers.IO) {
-        levelId = id
         when (val res = repository.fetchLevel(id)) {
             is ResultFDS.Success -> {
                 examples.addAll(res.data.map { it.toExampleUi() })
@@ -142,11 +141,12 @@ class GameViewModel(
             )
     }
 
-    private fun openGameResult() {
+    private fun openGameResult() = viewModelScope.launch(Dispatchers.IO) {
         val solved = solvedExamples.count { it.solved == true }
         val unSolved = solvedExamples.count { it.solved == false || it.solved == null }
         val levelPassed = solved == solvedExamples.size && unSolved == 0
-        router.openGameResult(levelId, solved, unSolved, sec, levelPassed)
+        if (levelPassed) repository.levelPassed(levelId)
+        router.openGameResult(solved, unSolved, sec, levelPassed)
     }
 
     fun comeback() = router.comeback()
